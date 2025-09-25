@@ -1,0 +1,15 @@
+{
+  "name": "agents-def",
+   "private": true,
+  "workspaces": ["apps/*"],
+  "packageManager": "npm@10.8.2", 
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+
+  }
+}
