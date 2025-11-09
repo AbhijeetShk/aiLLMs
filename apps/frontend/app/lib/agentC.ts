@@ -1,8 +1,8 @@
 import { generateText } from "ai";
 import prisma from "@/app/lib/prisma";
 import { groq } from "@ai-sdk/groq";
-
-export async function processPatientContext(patientId: string) {
+// Agent C - Process patient data and generate medical summary
+export async function agentC(patientId: string) {
   const patient = await prisma.user.findUnique({
     where: { authUserId: patientId },
     include: {
@@ -42,7 +42,7 @@ Summarize this patient's entire medical background in concise clinical form:
 
   const processedSummary = summary.text;
 
-  // store in patient.notes
+  //disease field holds entire medical context summary
   await prisma.user.update({
     where: { authUserId: patientId },
     data: { disease: processedSummary },

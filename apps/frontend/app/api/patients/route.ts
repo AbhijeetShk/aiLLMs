@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/app/generated/prisma";
-import { withAccelerate } from "@prisma/extension-accelerate";
-const db = new PrismaClient().$extends(withAccelerate());
-import { createClient } from "@supabase/supabase-js";
-const prisma = new PrismaClient();
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import prisma  from "@/app/lib/prisma";
 
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
@@ -15,21 +7,33 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (!patientId) {
       return NextResponse.json({ success: false, error: "Missing token" });
     }
-
-    const patient = await prisma.user.findUnique({
-      where: { id: patientId },
+    const appUser = await prisma.user.findUnique({
+      where: { authUserId: patientId },
+      include: {
+        reports: {
+          include: {
+            aiAnalysis: true,
+            diagnosis: true,
+            doctor: true,
+          },
+        },
+      },
     });
-    if (role === "doctor") {
-      const doctor = await prisma.doctor.create({
-        data: { authUserId, email, name },
-      });
-      return NextResponse.json({ success: true, doctor });
-    } else {
-      const user = await prisma.user.create({
-        data: { authUserId, email, name },
-      });
-      return NextResponse.json({ success: true, user });
-    }
+
+    const doctor = await prisma.doctor.findUnique({
+      where: { authUserId: patientId },
+      include: {
+        specialization: true,
+      },
+    });
+
+    let result = appUser || doctor;
+
+    //disease string has all context summed up from all three bots
+    //reports can be showed up on left side as toggle
+    //reports->diagnosis->Ai analysis could be shown
+
+    return NextResponse.json({ success: true, result });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ success: false, error: "Failed to sync user" });
