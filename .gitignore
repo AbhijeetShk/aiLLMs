@@ -3,7 +3,9 @@ node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-
+/packages/db/app
+**/.prisma/
+**/generated/
 # Turborepo
 .turbo/
 
