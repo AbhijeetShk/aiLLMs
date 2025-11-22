@@ -1,4 +1,4 @@
-import pkg from "../app/generated/prisma/index.js";
+import pkg from "../../../frontend/app/generated/prisma/index.js";
 import { v4 as uuidv4 } from "uuid";
 const {PrismaClient} = pkg;
 const prisma = new PrismaClient();

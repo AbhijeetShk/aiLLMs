@@ -62,5 +62,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
   //Dynamic disease field: On each new report, disease field will be updated: based on fresh report only
   
-  return result.toTextStreamResponse();
+  let results = await result.text;
+  // console.log({ results }, "from agent b");
+  return NextResponse.json({ success: true, results });
 }

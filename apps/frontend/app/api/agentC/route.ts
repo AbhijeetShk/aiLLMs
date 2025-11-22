@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import prisma from "@/app/lib/prisma";
+import prisma from "@/db/prisma/prismaCl";
 import { groq } from "@ai-sdk/groq";
 
 export async function processPatientContext(patientId: string) {
@@ -41,7 +41,7 @@ Summarize this patient's entire medical background in concise clinical form:
   });
 
   const processedSummary = summary.text;
-
+console.log({processedSummary}, "from agent c")
   // store in patient.notes
   await prisma.user.update({
     where: { authUserId: patientId },

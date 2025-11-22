@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export function PatientSelector({ onSelect }: { onSelect: (p: any) => void }) {
   const patients = [
-    { id: 1, name: "Aarav Sharma", disease: "Pneumonia" },
+    { id: 1, name: "Jane", disease: "Pneumonia" },
     { id: 2, name: "Diya Patel", disease: "Cardiomegaly" },
   ];
 

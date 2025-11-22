@@ -1,28 +1,41 @@
-import { PrismaClient } from "@/app/generated/prisma";
+import { PrismaClient } from "@/db/app/generated/prisma";
 import { withAccelerate } from "@prisma/extension-accelerate";
 const db = new PrismaClient().$extends(withAccelerate());
 import { processPatientContext } from "../agentC/route";
 import { streamText } from "ai";
 import { groq } from "@ai-sdk/groq";
-export async function patientChatAgent(userId: string, message: string) {
-  const user = await db.user.findUnique({ where: { id: userId } });
-  const context = user?.disease ?? "No medical summary available yet.";
+import { NextRequest, NextResponse } from "next/server";
+import { ca } from "zod/v4/locales";
+export async function POST(req: NextRequest, res: NextResponse) {
+  try {
+const { messages, userId } = await req.json();
+let message = messages[0].parts[0]?.text || "";
+    console.log(JSON.stringify(messages));
+console.log({message})
+    const user = await db.user.findUnique({ where: { authUserId: userId } });
+    const context = user?.disease ?? "No medical summary available yet.";
 
-   const response = await streamText({
-    model: groq("llama-3.3-70b-versatile"),
-    messages: [
-      {
-        role: "system",
-        content: `You are a patient-facing AI medical assistant.
-        Always be empathetic and factual.
-        Patient medical context:
-        ${context}`,
-      },
-      { role: "user", content: message },
-    ],
-  });
-
-  return response;
+    const response = await streamText({
+      model: groq("llama-3.3-70b-versatile"),
+      messages: [
+        {
+          role: "system",
+          content: `You are a patient-facing AI medical assistant.
+            Always be empathetic and factual.
+            Patient medical context:
+            ${context}`,
+        },
+        { role: "user", content: message },
+      ],
+    });
+    console.log({response})
+    return response.toUIMessageStreamResponse();
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      error: "Error processing request",
+    });
+  }
 }
 // Agent A gotta push user req to model, get data, feed it to llm -> get something, something to db
 

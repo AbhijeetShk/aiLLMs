@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@/app/generated/prisma";
+import { PrismaClient } from "@/db/app/generated/prisma";
 import { withAccelerate } from "@prisma/extension-accelerate";
 const db = new PrismaClient().$extends(withAccelerate());
 import { createClient } from "@supabase/supabase-js";
