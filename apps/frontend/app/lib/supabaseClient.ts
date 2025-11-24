@@ -1,7 +1,13 @@
-import { createClient } from "@supabase/supabase-js";
- const supabase = createClient(
-   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+import { createBrowserClient } from '@supabase/ssr'
+ const supabase = createBrowserClient(
+   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  }
 
 );
 export default supabase;

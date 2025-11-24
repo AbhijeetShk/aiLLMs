@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     });
 
     let result = appUser || doctor;
-
+console.log({result})
     //disease string has all context summed up from all three bots
     //reports can be showed up on left side as toggle
     //reports->diagnosis->Ai analysis could be shown

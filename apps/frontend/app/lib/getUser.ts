@@ -1,4 +1,4 @@
-import { createClient } from "./supabaseFr";
+import { createClient } from "./supabaseServer";
 import axios from "axios";
 export async function getSessionUser() {
   const supabase = await createClient();

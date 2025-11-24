@@ -61,15 +61,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100`}
+    <html>
+      <body>
+    <div lang="en">
+      <div
+        className={`${(geistSans && geistSans.variable ) || "" } ${(geistMono && geistMono.variable)|| ""} antialiased bg-slate-100`}
       >
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <Sidebar />
 
-          {/* Main body */}
+          {/* Main div */}
           <div className="flex-1 flex flex-col">
             {/* Topbar */}
             <Topbar />
@@ -78,7 +80,9 @@ export default function RootLayout({
             <main className="p-6">{children}</main>
           </div>
         </div>
-      </body>
+      </div>
+    </div>
+    </body>
     </html>
   );
 }

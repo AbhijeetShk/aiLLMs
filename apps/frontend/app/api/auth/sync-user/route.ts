@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@/db/app/generated/prisma";
-import { withAccelerate } from "@prisma/extension-accelerate";
-const db = new PrismaClient().$extends(withAccelerate());
-import { createClient } from "@supabase/supabase-js";
-const prisma = new PrismaClient();
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! 
-);
+import prisma from "@/db/prisma/prismaCl";
 
 export async function POST(req: Request) {
   try {
+    console.log("Sync user called");
     const { authUserId, email, name, role } = await req.json();
+    const existingUser =
+      role === "DOCTOR"
+        ? await prisma.doctor.findUnique({ where: { authUserId } })
+        : await prisma.user.findUnique({ where: { authUserId } });
 
-    if (role === "doctor") {
+    if (existingUser) {
+      return NextResponse.json({ success: true, message: "Already synced" });
+    }
+    if (role === "DOCTOR") {
       const doctor = await prisma.doctor.create({
         data: { authUserId, email, name },
       });

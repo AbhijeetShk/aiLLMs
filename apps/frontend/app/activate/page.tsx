@@ -31,6 +31,9 @@ import {storeReportEmbedding} from "../lib/reportVector";
 //   })
 //   console.log({ result }, "after storing report embedding");
 // }, [])
+
+
+
 export default function DoctorDashboard() {
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
 

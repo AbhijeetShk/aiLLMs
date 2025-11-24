@@ -1,6 +1,5 @@
-import { PrismaClient } from "@/db/app/generated/prisma";
-import { withAccelerate } from "@prisma/extension-accelerate";
-const db = new PrismaClient().$extends(withAccelerate());
+import prisma from "@/db/prisma/prismaCl";
+let db = prisma;
 import { processPatientContext } from "../agentC/route";
 import { streamText } from "ai";
 import { groq } from "@ai-sdk/groq";
@@ -9,12 +8,15 @@ import { ca } from "zod/v4/locales";
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
 const { messages, userId } = await req.json();
-let message = messages[0].parts[0]?.text || "";
+
+const message = messages
+  .filter((m:any) => m.role === "user")
+  .at(-1)?.parts?.[0]?.text || "";
     console.log(JSON.stringify(messages));
 console.log({message})
     const user = await db.user.findUnique({ where: { authUserId: userId } });
+    console.log({user}, "from agentD")
     const context = user?.disease ?? "No medical summary available yet.";
-
     const response = await streamText({
       model: groq("llama-3.3-70b-versatile"),
       messages: [
@@ -23,7 +25,7 @@ console.log({message})
           content: `You are a patient-facing AI medical assistant.
             Always be empathetic and factual.
             Patient medical context:
-            ${context}`,
+            ${context} ${JSON.stringify(user)}`,
         },
         { role: "user", content: message },
       ],
@@ -31,6 +33,7 @@ console.log({message})
     console.log({response})
     return response.toUIMessageStreamResponse();
   } catch (error) {
+    console.log({error})
     return NextResponse.json({
       success: false,
       error: "Error processing request",
