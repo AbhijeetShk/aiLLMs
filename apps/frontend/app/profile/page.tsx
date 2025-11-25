@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import supabase from "../lib/supabaseClient";
 
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [disease, setDisease] = useState("");
+  const [diseaseInfo, setDiseaseInfo] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +25,6 @@ export default function ProfilePage() {
         
         setName(user.name || "");
         setEmail(user.email || "");
-        setDisease(user.disease || "");
       } catch (error) {
         console.error("Error fetching profile:", error);
         setMessage("Failed to load profile");
@@ -44,7 +44,7 @@ export default function ProfilePage() {
       const res = await fetch(`/api/user/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, disease }),
+        body: JSON.stringify({ name, diseaseInfo }),
       });
 
       if (res.ok) {
@@ -92,11 +92,12 @@ export default function ProfilePage() {
             className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-gray-100 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
           />
 
+     
           <input
             type="text"
-            value={disease}
+            value={diseaseInfo}
             placeholder="Disease (optional)"
-            onChange={(e) => setDisease(e.target.value)}
+            onChange={(e) => setDiseaseInfo(e.target.value)}
             className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-gray-100 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
           />
 

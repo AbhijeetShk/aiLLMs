@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma  from "@/db/prisma/prismaCl";
+import prisma from "@/db/prisma/prismaCl";
 
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
@@ -11,10 +11,14 @@ export async function GET(req: NextRequest, res: NextResponse) {
       where: { authUserId: patientId },
       include: {
         reports: {
+          orderBy: {
+            createdAt: "desc", 
+          },
           include: {
             aiAnalysis: true,
             diagnosis: true,
             doctor: true,
+            user:true
           },
         },
       },
@@ -28,7 +32,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     });
 
     let result = appUser || doctor;
-console.log({result})
+    console.log({ result });
     //disease string has all context summed up from all three bots
     //reports can be showed up on left side as toggle
     //reports->diagnosis->Ai analysis could be shown

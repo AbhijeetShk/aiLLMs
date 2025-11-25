@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { useRef } from "react";
 //
-export function ReportUploader() {
+export function ReportUploader({ id }: { id: string }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadClick = () => {
@@ -17,7 +17,7 @@ export function ReportUploader() {
     if (!file) return;
 
     try {
-      await handleUpload(file, "23140e89-eeaa-42e2-82f9-d35cc874357a");
+      await handleUpload(file, id);
 
       console.log("Upload success");
     } catch (error) {

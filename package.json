@@ -14,14 +14,18 @@
     "lint": "turbo run lint"
   },
   "dependencies": {
+    "@huggingface/inference": "^2.6.6",
+    "@langchain/community": "^0.0.21",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@prisma/extension-accelerate": "^3.0.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "cloudinary": "^2.8.0",
     "dotenv": "^17.2.3",
+    "langchain": "^0.1.35",
     "pg": "^8.16.3",
     "prisma": "^7.0.0",
+    "remark-gfm": "^4.0.1",
     "swr": "^2.3.6"
   }
 }

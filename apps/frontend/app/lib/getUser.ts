@@ -1,7 +1,7 @@
-import { createClient } from "./supabaseServer";
+import supabase from "./supabaseClient";
 import axios from "axios";
-export async function getSessionUser() {
-  const supabase = await createClient();
+export async function getSessionUser(id:string) {
+
 
   const {
     data: { user },
@@ -9,7 +9,7 @@ export async function getSessionUser() {
 
   if (!user) return null;
   let dbUser = await axios.get("/api/patients", {
-    params: { token: user.id },
+    params: { token: id },
   });
   return dbUser;
 }

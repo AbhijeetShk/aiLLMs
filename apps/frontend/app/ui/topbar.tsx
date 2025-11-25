@@ -6,7 +6,12 @@ import Link  from "next/link";
 
 export default function Topbar() {
   const [userName, setUserName] = useState("Guest");
+const [loggedIn, setLoggedIn] = useState(false)
+const [isClient, setIsClient] = useState(false);
 
+useEffect(() => {
+  setIsClient(true);
+}, []);
   useEffect(() => {
     async function getUser() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -16,6 +21,7 @@ export default function Topbar() {
                      session.user.email?.split('@')[0] || 
                      session.user.email;
         setUserName(name);
+        setLoggedIn(true)
       }
     }
 
@@ -35,7 +41,12 @@ export default function Topbar() {
 
     return () => subscription.unsubscribe();
   }, []);
-
+const handleSignOut = async () => {
+  setLoggedIn(false)
+  await supabase.auth.signOut();
+  // Optional: redirect after logout
+  window.location.href = "/login"; 
+};
   return (
     <header className="bg-white shadow flex items-center justify-between px-6 py-3">
       <div className="text-gray-600">Welcome back 👋</div>
@@ -43,6 +54,9 @@ export default function Topbar() {
         <button className="text-gray-600 hover:text-blue-600">🔔</button>
         <div className="px-3 py-1 rounded-lg bg-blue-600 text-white text-sm">
           <Link href="/profile">{userName}</Link>
+        </div>
+        <div className="px-3 py-1 rounded-lg bg-red-600 text-white text-sm cursor-pointer">
+          <p onClick={handleSignOut}>{isClient ? (loggedIn ? "Sign Out" : "Sign In") : ""}</p>
         </div>
       </div>
     </header>

@@ -52,7 +52,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Medical Assistant",
-  description: "Unified Patient Dashboard, Doctor Dashboard & AI Medical Chatbot",
+  description:
+    "Unified Patient Dashboard, Doctor Dashboard & AI Medical Chatbot",
 };
 
 export default function RootLayout({
@@ -60,13 +61,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const fonts = `${geistSans.variable} ${geistMono.variable}`;
   return (
-    <html>
-      <body>
-    <div lang="en">
-      <div
-        className={`${(geistSans && geistSans.variable ) || "" } ${(geistMono && geistMono.variable)|| ""} antialiased bg-slate-100`}
-      >
+    <html lang="en">
+      <body className={`${fonts} antialiased bg-slate-100`}>
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <Sidebar />
@@ -80,9 +78,7 @@ export default function RootLayout({
             <main className="p-6">{children}</main>
           </div>
         </div>
-      </div>
-    </div>
-    </body>
+      </body>
     </html>
   );
 }

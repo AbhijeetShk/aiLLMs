@@ -46,11 +46,11 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { name, disease } = await req.json();
+    const { name, diseaseInfo = null } = await req.json();
 
     const updatedUser = await prisma.user.update({
       where: { authUserId: user.id },
-      data: { name, disease },
+      data: { name, disease:diseaseInfo },
     });
 
     return NextResponse.json(updatedUser);

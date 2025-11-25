@@ -3,8 +3,12 @@ import prisma from "@/db/prisma/prismaCl";
 import { groq } from "@ai-sdk/groq";
 import { updateUserVectors } from "./userVector";
 import { createEmbeddings } from "./createEmbeddings";
-import supabase from "./supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 export async function agentC(patientId: string) {
   console.log("Agent C running for:", patientId);
 
@@ -12,10 +16,19 @@ export async function agentC(patientId: string) {
     where: { authUserId: patientId },
     include: {
       reports: {
-        include: {
+        orderBy: {
+          createdAt: "desc",
+        },
+
+        select: {
+          id: true,
+          date: true,
+          severity: true,
+          reportText: true,
+          imageUrl: true,
           aiAnalysis: true,
           diagnosis: true,
-          doctor: { include: { specialization: true } },
+          doctor: true,
         },
       },
     },
@@ -23,39 +36,35 @@ export async function agentC(patientId: string) {
 
   if (!patient) throw new Error("Patient not found");
 
- await updateUserVectors(patientId, patient.disease || "", patient);
- async function getPatientContext(patientId: string) {
-  // 1. build embedding for the “summarization request”
-  const queryEmbedding = await createEmbeddings(
-    "summarize patient's entire medical history"
-  );
+  //  await updateUserVectors(patientId, patient.disease || "", patient); //create user embedding
+  //  async function getPatientContext(patientId: string) {
 
-  // 2. retrieve relevant memory from patient's vector DB
-  const { data, error } = await supabase.rpc("match_patient_embeddings", {
-    patient: patientId,
-    query_embedding: queryEmbedding,
-    match_count: 8,
-  });
+  //   const queryEmbedding = await createEmbeddings(
+  //     "summarize patient's entire medical history"
+  //   );
 
-  if (error) {
-    console.error("Error retrieving embeddings:", error);
-    return "";
-  }
+  // const { data, error } = await supabase.rpc("match_patient_embeddings", {
+  //   patient: patientId,
+  //   query_embedding: queryEmbedding,
+  //   match_count: 8,
+  // });
 
-  return data.map((d: any) => d.content).join("\n\n");
-}
+  // if (error) {
+  //   console.error("Error retrieving embeddings:", error);
+  //   return "";
+  // }
 
+  // return data.map((d: any) => d.content).join("\n\n");
+  // }
 
-  // 2. Instead of JSON.stringify(patient) → get vector context
-  const retrievedContext = await getPatientContext(patientId);
+  // const retrievedContext = await getPatientContext(patientId);
 
-  // 3. summarization prompt
   const prompt = `
 You are a medical data summarizer.
 Use ONLY the retrieved context below:
 
 RETRIEVED CONTEXT:
-${retrievedContext}
+${JSON.stringify(patient)}
 
 `;
 
@@ -70,13 +79,13 @@ ${retrievedContext}
   });
 
   const processedSummary = finalSummary.text;
-console.log({processedSummary}, "from agent c")
+  console.log({ processedSummary }, "from agent c");
   //disease field holds entire medical context summary
- let result =  await prisma.user.update({
+  let result = await prisma.user.update({
     where: { authUserId: patientId },
     data: { disease: processedSummary },
   });
-console.log({result}, "after updating disease field in agent c")
+  console.log({ result }, "after updating disease field in agent c");
   return processedSummary;
 }
-agentC('23140e89-eeaa-42e2-82f9-d35cc874357a')
+// agentC('23140e89-eeaa-42e2-82f9-d35cc874357a')

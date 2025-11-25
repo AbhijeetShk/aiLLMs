@@ -22,28 +22,43 @@ export async function POST(req: NextRequest) {
     folder: "radiology",
     resource_type: "auto", // image, pdf...
   });
-
-  const res = await axios.post("http://localhost:8000/predict", body);
-
+console.log("agent a called")
+  const res = await axios.post("http://localhost:8000/gradcam/top3", body);
+  // const res = await axios.post("http://localhost:8000/predict?threshold=0.3", body);
+console.log("agent a called server")
   let data = res.data;
-  if (!data.top3_labels) {
+  console.log({data})
+  if (!data.results) {
     return NextResponse.json({
       success: false,
       error: "Missing labels",
     });
   }
-  const disease = JSON.stringify(data.top3_labels);
+  let disease='';
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   try {
-    type Top3Labels = [string, number][];
+   type Top3Labels = {
+    label: string;
+    probability: number;
+    overlay_image: string;
+    masked_image: string;
+  };
     let diseaseInfoResponses: string[] = [];
-    data.top3_labels.forEach(async (element: Top3Labels) => {
-      let res = await axios.get(
-        `${baseUrl}/api/agentB?token=${patientId}&disease=${element[0]}`
+    const extractedResults = data.results.map((element: Top3Labels) => ({
+  label: element.label,
+  overlay_image: element.overlay_image,
+  masked_image: element.masked_image,
+}));
+    data.results.forEach(async (element: Top3Labels) => {
+      let resP = await axios.get(
+        `${baseUrl}/api/agentB?token=${patientId}&disease=${element.label}`
       );
-      let data = res.data.results;
-      diseaseInfoResponses.push(data);
-      //   console.log({ diseaseInfoResponses }, "from agent a");
+      console.log(resP.data, "frkm")
+      let dataB = resP.data.results;
+      console.log({dataB})
+      disease += {"label":data.label, "probability":data.probability}
+      diseaseInfoResponses.push(dataB);
+        console.log({ diseaseInfoResponses }, "from agent a");
     });
     const result = await generateText({
       model: groq("llama-3.3-70b-versatile"),
@@ -76,6 +91,7 @@ export async function POST(req: NextRequest) {
             findings: JSON.stringify(result),
           },
         },
+        GradCamImage:extractedResults,
       },
       include: {
         aiAnalysis: true,
@@ -84,12 +100,13 @@ export async function POST(req: NextRequest) {
       },
     });
     console.log({ reportData }, "new report created agent a");
-    await storeReportEmbedding(reportData);
+    // await storeReportEmbedding(reportData);
     agentC(patientId); //async call to update patient context in background
 
     // let res = axios.get(`https://www.ncbi.nlm.nih.gov/medgen/?term=${element[0]}`);
     return NextResponse.json({ data, success: true });
   } catch (error: any) {
+    console.log({error})
     return NextResponse.json({
       success: false,
       error: error.message,
